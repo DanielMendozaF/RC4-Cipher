@@ -33,9 +33,11 @@ void discard_bytes(unsigned char S[], int&i, int& j){
     }
 }
 
+// Main function
 int main(){   
-    string key_string;
+
     // User input for key as a string
+    string key_string;
     cout << "Enter a 5 - 32 byte long key: " << endl;
     getline(cin, key_string);
 
@@ -45,12 +47,13 @@ int main(){
         getline(cin, key_string);
     }
 
-    // User input for plaintext file to encypt
+    // User input for plaintext input file to encypt
     string plainFile;
     cout << "Enter plaintext file to encrypt: " << endl;
     getline(cin, plainFile);
     ifstream inputFile(plainFile, ios::binary);
 
+    // Condition to ensure input file is open
     if (inputFile.is_open()){
 
         // Initialize state array and integer variables
@@ -58,10 +61,10 @@ int main(){
         int i = 0;
         int j = 0;
 
-        // Key scheduling algorithm function
+        // Call to key scheduling algorithm function
         KSA(state_array, key_string);
 
-        // Function to discard bytes 
+        // Call to function that discards initial 3072 bytes 
         discard_bytes(state_array, i, j);
 
         // User input for cipher text output file
@@ -70,21 +73,33 @@ int main(){
         getline(cin, cipherFile);
         ofstream outputFile(cipherFile,ios::binary);
 
+        // Condition to ensure output file is open
         if (outputFile.is_open()){   
-            char c;
-            while (inputFile.get(c)){
-                unsigned char encrypt = c ^ PRGA(state_array, i, j);
-                outputFile << setw(2) << setfill('0') << hex << (int)encrypt;
+
+            // Variable for input plaintext file character
+            char file_character;
+
+            // While loop to read all the characters of the input plaintext file
+            while (inputFile.get(file_character)){
+
+                // Bitwise XOR operation between plaintext file characters and keystream from PRGA function
+                unsigned char encrypt_character = file_character ^ PRGA(state_array, i, j);
+
+                // Convert encrypted characters to hexadecimal using the hex output manipulator
+                outputFile << setw(2) << setfill('0') << hex << (int)encrypt_character;
             }
+
             // Give user feedback on ecryption results
             cout << "The encryption was a success!" << endl;
         }
+        // Condition if there is an error opening output file
         else{
             cout << "Error opening output file" << endl;
         }
         inputFile.close();
         outputFile.close();
     }
+    // Condition if there is an error opening input file
     else{
         cout << "Error opening input file" << endl;
     }

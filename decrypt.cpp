@@ -34,9 +34,10 @@ void discard_bytes(unsigned char S[], int&i, int& j){
 }
 
 int main(){   
+
+    // User input for same key used in encryption process
     string key_string;
-    // User input for key used in encryption process
-    cout << "Enter your 5 - 32 byte key used for the encryption of the file: " << endl;
+    cout << "Enter the same 5 - 32 byte key used in the encryption of the ciphertext file: " << endl;
     getline(cin, key_string);
 
     // Condition to validate key length of 5 - 32 bytes long 
@@ -58,35 +59,46 @@ int main(){
         int i = 0;
         int j = 0;
 
-        // Key scheduling algorithm function
+        // Call to key scheduling algorithm function
         KSA(state_array, key_string);
 
-        // Function to discard bytes 
+        // Call to function to discard initial 3072 bytes 
         discard_bytes(state_array, i, j);
 \
-        // User input for cipher text output file
+        // User input for decrypted text output file
         string decryptedFile;
         cout << "Enter file for decryption output: " << endl;
         getline(cin, decryptedFile);
         ofstream outputFile(decryptedFile,ios::binary);
 
+        // Condition to ensure output file is open
         if (outputFile.is_open()){   
             
-            string byte;
-            while (inputFile >> setw(2) >> byte){
-                int convert_byte = stoi(byte, nullptr, 16);
-                char c = convert_byte ^ PRGA(state_array, i ,j);
-                outputFile << c;
+            string hex_byte;
+            
+            // Condition to read hexadecimal bytes from input file 
+            while (inputFile >> setw(2) >> hex_byte){
+
+                // Line to convert hexadecimal byte to integer byte using stoi function from <string> 
+                int int_byte = stoi(hex_byte, nullptr, 16);
+
+                // Bitwise XOR operation between plaintext file characters and keystream from PRGA function
+                char decrypt_character = int_byte ^ PRGA(state_array, i ,j);
+                outputFile << decrypt_character;
             }
-            // User feedback on decrpytion results
-            cout << "The decryption was a sucess!" << endl;
+
+            // User feedback for decrpytion results
+            cout << "The decryption was a success!" << endl;
         }
+        // Condition if there is an error opening output file
         else{
             cout << "Error opening output file" << endl;
         }
         inputFile.close();
         outputFile.close();
     }
+
+    // Condition if there is an error opening input file
     else{
         cout << "Error opening input file" << endl;
     }
